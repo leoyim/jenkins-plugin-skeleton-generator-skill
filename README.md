@@ -123,7 +123,7 @@ AI 会同时提供后续操作指引：
 
 | 场景 | 影响 | 建议 |
 |------|------|------|
-| 输错版本号（如 `Jenkins 3.0`） | 可能生成错误的 Parent POM 版本 | 参考 [Jenkins 与 JDK 兼容表](#) 核对 |
+| 输错版本号（如 `Jenkins 3.0`） | 可能生成错误的 Parent POM 版本 | 参考 [Jenkins 与 JDK 兼容表](https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html) 核对 |
 | 版本组合不兼容（如 Jenkins 2.426 + JDK 11） | 构建或运行时报错 | 确保 JDK 版本 ≥ Jenkins 要求的最低版本 |
 | 漏填必填信息 | 生成的项目不完整 | 仔细过一遍「需要准备什么」清单 |
 | 自定义扩展点（非 7 种标准类型） | 不会自动生成该类型代码 | 选择最接近的类型后在生成结果上手动改造 |
