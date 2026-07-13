@@ -32,7 +32,9 @@ templates/                         # 代码与配置模板
 references/                        # 参考文档
   ├── plugin-types.md             # 插件类型 / 扩展点对照表
   ├── trigger-timing-reference.md # 触发时机参考表
-  └── compatibility-check.md      # 兼容性检查清单
+  ├── compatibility-check.md      # 兼容性检查清单
+  ├── troubleshooting.md          # 故障排查指南
+  └── jelly-reference.md          # Jelly 控件完整参考
 ```
 
 ---
@@ -85,7 +87,35 @@ references/                        # 参考文档
 - Jenkins Plugin Parent版本选择
 - 依赖版本确定
 
+**输入验证与纠错**（在生成文件前必须执行）：
+
+1. **必填项检查**：Jenkins 版本和 JDK 版本缺一不可，缺少任一字段必须反问用户补齐。
+2. **版本格式校验**：Jenkins 版本应为 `x.y.z` 格式（如 `2.401.1`），JDK 版本应为数字（如 `11`、`17`、`21`）。
+3. **Jenkins 与 JDK 兼容性校验**：
+
+   | Jenkins 版本 | 最低 JDK | 说明 |
+   |-------------|---------|------|
+   | < 2.361 | JDK 8 | 已结束生命周期，建议升级 |
+   | 2.361 - 2.419 | JDK 11 | |
+   | 2.420 - 2.462 | JDK 17 | |
+   | 2.463+ | JDK 17 或 JDK 21 | |
+
+   如检测到不兼容组合（如 Jenkins 2.426 搭配 JDK 11），**必须主动警告用户并建议修正**。
+
+4. **Plugin Parent POM 版本确定**：根据 Jenkins 版本查找对应的 Plugin Parent 版本：
+
+   | Jenkins 版本 | Parent POM |
+   |-------------|-----------|
+   | 2.361.x | 4.66 |
+   | 2.401.x | 4.75 |
+   | 2.426.x | 4.80 |
+   | 2.440.x | 4.83 |
+   | 2.462.x | 4.85 |
+
+   如无法精确匹配，选择不高于用户 Jenkins 版本的最新 Parent POM，并向用户说明。
+
 > 详细兼容性检查项目见 `references/compatibility-check.md`
+> 构建或运行中遇到问题见 `references/troubleshooting.md`
 
 ### 第二步：触发时机与扩展点设计
 
@@ -103,22 +133,24 @@ references/                        # 参考文档
 
 根据用户提供的插件元数据，生成 `README.md` 文件。模板 `templates/readme-template.md` 使用 `{{PLACEHOLDER}}` 占位符，生成时替换为实际值：
 
-| 占位符 | 来源 |
-|--------|------|
-| `{{PLUGIN_DISPLAY_NAME}}` | 用户提供的插件名称 |
-| `{{PLUGIN_DESCRIPTION}}` | 根据插件类型自动生成一段简要描述 |
-| `{{JENKINS_VERSION}}` | 用户提供的 Jenkins 版本 |
-| `{{JDK_VERSION}}` | 用户提供的 JDK 版本 |
-| `{{MAVEN_VERSION}}` | 用户提供的 Maven 版本（未提供则填"3.6+"） |
-| `{{EXTENSION_TYPE}}` | 用户选择的插件类型 |
-| `{{TRIGGER_TIMING}}` | 用户选择的触发时机 |
-| `{{ARTIFACT_ID}}` | 用户提供的 artifactId |
-| `{{PACKAGE_PATH}}` | 包名对应的路径（如 `com/example/plugin`） |
-| `{{MAIN_CLASS}}` | 主扩展类名 |
-| `{{USAGE_*}}` | 根据插件类型生成对应使用说明 |
-| `{{CONFIG_ITEMS}}` | 根据是否需要持久化配置生成配置项表格 |
-| `{{ASYNC_FEATURE}}` / `{{PERSISTENCE_FEATURE}}` / `{{GLOBAL_CONFIG_FEATURE}}` | 根据用户选择填充或不生成 |
-| `{{LICENSE_INFO}}` | 默认 MIT License |
+| 占位符 | 来源 | 填充示例 |
+|--------|------|---------|
+| `{{PLUGIN_DISPLAY_NAME}}` | 用户提供的插件名称 | `构建审计插件` |
+| `{{PLUGIN_DESCRIPTION}}` | 根据插件类型自动生成一段简要描述 | `记录每次构建的关键信息到日志，支持自定义日志级别和输出格式` |
+| `{{JENKINS_VERSION}}` | 用户提供的 Jenkins 版本 | `2.426` |
+| `{{JDK_VERSION}}` | 用户提供的 JDK 版本 | `17` |
+| `{{MAVEN_VERSION}}` | 用户提供的 Maven 版本（未提供则填"3.6+"） | `3.6+` |
+| `{{EXTENSION_TYPE}}` | 用户选择的插件类型 | `RunListener` |
+| `{{TRIGGER_TIMING}}` | 用户选择的触发时机 | `构建开始和完成时自动触发` |
+| `{{FEATURE_LIST}}` | 根据异步/持久化/全局配置开关动态拼接（无则留空） | `- 异步执行：每 5 分钟清理一次过期日志` |
+| `{{ARTIFACT_ID}}` | 用户提供的 artifactId | `build-auditor` |
+| `{{PACKAGE_PATH}}` | 包名对应的路径（如 `com/example/plugin`） | `com/company/audit` |
+| `{{MAIN_CLASS}}` | 主扩展类名 | `BuildAuditorListener` |
+| `{{USAGE_TITLE}}` | 根据插件类型生成标题：Builder→"在项目中使用"，Publisher→"配置构建后操作"，RunListener→"自动监听"，Trigger→"设置定时触发" | `自动监听` |
+| `{{USAGE_DESCRIPTION}}` | 根据插件类型生成编号步骤，以"打开 Jenkins 项目配置"开头 | `1. 项目启动后自动生效\n2. 无需额外配置` |
+| `{{CONFIGURATION_DETAILS}}` | 无持久化配置则省略；有则说明配置保存位置 | `所有配置项均保存在 Jenkins 全局配置中，重启不会丢失。` |
+| `{{CONFIG_ITEMS}}` | 如无配置项则填 `| - | - | - | (无配置项) |`；有则根据 Java 类字段名和类型生成表格行 | `\| message \| 字符串 \| Hello Jenkins \| 构建时输出的消息 \|` |
+| `{{LICENSE_INFO}}` | 默认 MIT License | `MIT License` |
 
 ### 第五步：Maven配置生成
 
@@ -149,7 +181,12 @@ references/                        # 参考文档
 
 根据是否需要配置界面，生成对应的Jelly文件。
 
-> Jelly 配置界面模板：`templates/config-jelly.md`
+生成 `config.jelly` 时，根据 Java 类中的字段类型选择对应控件：
+
+- `templates/config-jelly.md` — 基础模板 + 字段类型→控件映射表
+- `references/jelly-reference.md` — 全部可用控件（textbox、checkbox、password、textarea、number、dropdownList、select、radioBlock、repeatable）及用法示例
+
+> 生成后必须核对 Jelly 中 `field` 属性与 Java getter/setter 的对应关系（见 jelly-reference.md 末尾的命名对照表）。
 
 ### 第八步：构建与测试
 
@@ -210,6 +247,31 @@ mvn idea:idea         # IntelliJ IDEA
 9. **安装步骤** - 插件安装和验证指南
 10. **触发时机说明** - 明确说明各扩展点的触发时机
 11. **故障排除** - 常见问题和解决方法
+
+---
+
+## 常见问题与排查
+
+当用户反馈构建失败、安装异常或运行时错误时，请参考以下排查路径：
+
+### 快速诊断流程
+
+1. **先确认输入**：检查 Jenkins 版本与 JDK 版本是否兼容（见第一步的兼容性校验表）
+2. **再确认构建**：`mvn clean package -DskipTests` 是否通过
+3. **最后确认运行**：`mvn hpi:run` 是否正常启动
+
+### 典型问题速查
+
+| 症状 | 可能原因 | 排查方向 |
+|------|---------|---------|
+| 构建报依赖解析错误 | 仓库配置或 Parent POM 版本问题 | 检查 `pom.xml` 仓库地址和 Parent 版本 |
+| UnsupportedClassFileVersionError | JDK 版本不匹配 | 核对 `java.level` 与本地 JDK |
+| 端口被占用 | 8080 已被占用 | 改用 `-Djetty.port=9090` |
+| .hpi 上传后报找不到依赖 | jenkins.version 过高 | 降低到 ≤ 运行中 Jenkins 版本 |
+| 配置界面不显示 | config.jelly 字段不匹配 | 检查 field 与 getter/setter 一致性 |
+| 异步任务未执行 | 缺少 @Extension 或周期设置 | 确认注解和 getRecurrencePeriod() |
+
+> 详细排查步骤和解决方案见 `references/troubleshooting.md`
 
 ---
 
