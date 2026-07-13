@@ -20,13 +20,14 @@ activation:
 ```
 SKILL.md                          # 本文件：工作流指令
 templates/                         # 代码与配置模板
-  ├── pom.xml.template             # Maven POM 模板
-  ├── repository-config.xml.template # Maven 仓库配置片段
-  ├── builder.java.template        # Builder 扩展点模板
-  ├── run-listener.java.template   # RunListener 扩展点模板
-  ├── async-periodic-work.java.template # 异步任务模板
-  ├── plugin-configuration.java.template # 持久化配置模板
-  ├── config.jelly.template       # Jelly 配置界面模板
+  ├── pom.md                        # Maven POM 模板
+  ├── repository-config.md         # Maven 仓库配置片段
+  ├── builder.md                   # Builder 扩展点模板
+  ├── run-listener.md              # RunListener 扩展点模板
+  ├── async-periodic-work.md       # 异步任务模板
+  ├── plugin-configuration.md      # 持久化配置模板
+  ├── config-jelly.md              # Jelly 配置界面模板
+  ├── readme-template.md           # 项目 README 模板
   └── project-structure.md         # 项目目录结构
 references/                        # 参考文档
   ├── plugin-types.md             # 插件类型 / 扩展点对照表
@@ -98,7 +99,28 @@ references/                        # 参考文档
 
 > 标准目录结构见 `templates/project-structure.md`
 
-### 第四步：Maven配置生成
+### 第四步：README 生成
+
+根据用户提供的插件元数据，生成 `README.md` 文件。模板 `templates/readme-template.md` 使用 `{{PLACEHOLDER}}` 占位符，生成时替换为实际值：
+
+| 占位符 | 来源 |
+|--------|------|
+| `{{PLUGIN_DISPLAY_NAME}}` | 用户提供的插件名称 |
+| `{{PLUGIN_DESCRIPTION}}` | 根据插件类型自动生成一段简要描述 |
+| `{{JENKINS_VERSION}}` | 用户提供的 Jenkins 版本 |
+| `{{JDK_VERSION}}` | 用户提供的 JDK 版本 |
+| `{{MAVEN_VERSION}}` | 用户提供的 Maven 版本（未提供则填"3.6+"） |
+| `{{EXTENSION_TYPE}}` | 用户选择的插件类型 |
+| `{{TRIGGER_TIMING}}` | 用户选择的触发时机 |
+| `{{ARTIFACT_ID}}` | 用户提供的 artifactId |
+| `{{PACKAGE_PATH}}` | 包名对应的路径（如 `com/example/plugin`） |
+| `{{MAIN_CLASS}}` | 主扩展类名 |
+| `{{USAGE_*}}` | 根据插件类型生成对应使用说明 |
+| `{{CONFIG_ITEMS}}` | 根据是否需要持久化配置生成配置项表格 |
+| `{{ASYNC_FEATURE}}` / `{{PERSISTENCE_FEATURE}}` / `{{GLOBAL_CONFIG_FEATURE}}` | 根据用户选择填充或不生成 |
+| `{{LICENSE_INFO}}` | 默认 MIT License |
+
+### 第五步：Maven配置生成
 
 根据用户输入生成 `pom.xml`。**必须注意**：
 
@@ -107,29 +129,29 @@ references/                        # 参考文档
 
 生成时参考以下模板：
 
-- 仓库配置片段：`templates/repository-config.xml.template`
-- 完整 POM 模板：`templates/pom.xml.template`
+- 仓库配置片段：`templates/repository-config.md`
+- 完整 POM 模板：`templates/pom.md`
 
 应避免：不支持的 API、依赖冲突、servlet 命名空间问题。
 
-### 第五步：插件代码生成
+### 第六步：插件代码生成
 
 根据用户选择的插件类型，使用对应模板生成扩展代码：
 
 | 插件类型 | 对应模板文件 |
 |---------|------------|
-| Builder | `templates/builder.java.template` |
-| RunListener | `templates/run-listener.java.template` |
-| AsyncPeriodicWork（异步） | `templates/async-periodic-work.java.template` |
-| 持久化配置 | `templates/plugin-configuration.java.template` |
+| Builder | `templates/builder.md` |
+| RunListener | `templates/run-listener.md` |
+| AsyncPeriodicWork（异步） | `templates/async-periodic-work.md` |
+| 持久化配置 | `templates/plugin-configuration.md` |
 
-### 第六步：资源文件生成
+### 第七步：资源文件生成
 
 根据是否需要配置界面，生成对应的Jelly文件。
 
-> Jelly 配置界面模板：`templates/config.jelly.template`
+> Jelly 配置界面模板：`templates/config-jelly.md`
 
-### 第七步：构建与测试
+### 第八步：构建与测试
 
 提供构建命令：
 
@@ -150,7 +172,7 @@ mvn idea:idea         # IntelliJ IDEA
 
 输出位置：`target/插件名称.hpi`
 
-### 第八步：安装与验证
+### 第九步：安装与验证
 
 安装步骤：
 
@@ -178,15 +200,16 @@ mvn idea:idea         # IntelliJ IDEA
 生成完整的插件项目后，提供以下内容：
 
 1. **技术设计说明** - 插件架构、扩展点选择、触发时机说明
-2. **目录结构** - 完整的项目文件树
-3. **pom.xml** - 完整的Maven配置文件
-4. **Java源代码** - 所有扩展类和配置类
-5. **资源文件** - Jelly配置界面、帮助文档、国际化文件
-6. **测试代码** - 单元测试和集成测试（可选）
-7. **构建步骤** - 详细的构建命令
-8. **安装步骤** - 插件安装和验证指南
-9. **触发时机说明** - 明确说明各扩展点的触发时机
-10. **故障排除** - 常见问题和解决方法
+2. **README.md** - 完整的项目 README（功能、安装、使用、开发）
+3. **目录结构** - 完整的项目文件树
+4. **pom.xml** - 完整的Maven配置文件
+5. **Java源代码** - 所有扩展类和配置类
+6. **资源文件** - Jelly配置界面、帮助文档、国际化文件
+7. **测试代码** - 单元测试和集成测试（可选）
+8. **构建步骤** - 详细的构建命令
+9. **安装步骤** - 插件安装和验证指南
+10. **触发时机说明** - 明确说明各扩展点的触发时机
+11. **故障排除** - 常见问题和解决方法
 
 ---
 
@@ -200,6 +223,7 @@ mvn idea:idea         # IntelliJ IDEA
 - [ ] 在正确的触发时机执行
 - [ ] 能够成功构建（`mvn clean package`）
 - [ ] 生成有效的HPI包
+- [ ] README.md 包含完整的安装和使用说明
 - [ ] 遵循Jenkins插件开发规范
 - [ ] 包含完整的配置界面（如需要）
 - [ ] 代码注释完整

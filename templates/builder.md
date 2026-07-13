@@ -1,3 +1,6 @@
+# Builder 扩展点模板
+
+```java
 package com.example.plugin;
 
 import hudson.Extension;
@@ -63,3 +66,4 @@ public class YourPluginBuilder extends Builder implements SimpleBuildStep, Seria
         }
     }
 }
+```

@@ -1,3 +1,6 @@
+# 异步任务模板（AsyncPeriodicWork）
+
+```java
 import hudson.Extension;
 import hudson.model.AsyncPeriodicWork;
 import hudson.model.TaskListener;
@@ -20,3 +23,4 @@ public class YourAsyncPlugin extends AsyncPeriodicWork {
         return MIN * 5; // 每5分钟执行一次
     }
 }
+```

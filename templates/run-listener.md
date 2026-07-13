@@ -1,3 +1,6 @@
+# RunListener 扩展点模板
+
+```java
 package com.example.plugin;
 
 import hudson.Extension;
@@ -22,3 +25,4 @@ public class YourPluginListener extends RunListener<Run<?, ?>> {
         listener.getLogger().println("Build completed: " + run.getResult());
     }
 }
+```

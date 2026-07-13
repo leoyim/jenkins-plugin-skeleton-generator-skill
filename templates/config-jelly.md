@@ -1,3 +1,6 @@
+# Jelly 配置界面模板
+
+```xml
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
     <f:entry title="消息" field="message">
@@ -7,3 +10,4 @@
         <f:checkbox default="false"/>
     </f:entry>
 </j:jelly>
+```

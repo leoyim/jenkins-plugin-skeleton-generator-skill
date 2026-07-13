@@ -1,3 +1,6 @@
+# 持久化配置模板
+
+```java
 package com.example.plugin.config;
 
 import hudson.Extension;
@@ -29,3 +32,4 @@ public class PluginConfiguration extends AbstractDescribableImpl<PluginConfigura
         }
     }
 }
+```
