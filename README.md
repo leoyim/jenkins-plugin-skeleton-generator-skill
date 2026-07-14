@@ -1,84 +1,88 @@
-# Jenkins 插件骨架生成器
+# Jenkins Plugin Skeleton Generator
 
-> 一句话描述需求，AI 自动生成完整的 Jenkins 插件项目骨架。
+> Describe your plugin in one sentence — the AI generates a complete Jenkins plugin project skeleton.
 
-[![SKILLHUB](https://img.shields.io/badge/SKILLHUB-已发布-3b82f6)](https://www.skillhub.cn/skills/jenkins-plugin-skeleton-generator-skill)
+[![SKILLHUB](https://img.shields.io/badge/SKILLHUB-Published-3b82f6)](https://www.skillhub.cn/skills/jenkins-plugin-skeleton-generator-skill)
+[![ClawHub](https://img.shields.io/badge/ClawHub-Published-f97316)](https://clawhub.ai/leoyim/skills/jenkins-plugin-skeleton-generator-skill)
 
-## 安装
+[中文](README.zh.md)
 
-在 [SKILLHUB](https://www.skillhub.cn/skills/jenkins-plugin-skeleton-generator-skill) 中搜索「Jenkins 插件骨架生成器」并安装，或在终端执行：
+## Installation
+
+Search for "Jenkins Plugin Skeleton Generator" on [SKILLHUB](https://www.skillhub.cn/skills/jenkins-plugin-skeleton-generator-skill) or [ClawHub](https://clawhub.ai/leoyim/skills/jenkins-plugin-skeleton-generator-skill) and install, or run in terminal:
 
 ```bash
-skillhub install jenkins-plugin-skeleton-generator-skill
+openclaw skills install @leoyim/jenkins-plugin-skeleton-generator-skill
 ```
 
-## 快速开始
+## Quick Start
 
-在OpenCode/Codex/Claude Code等工具中对 AI 说类似以下的话即可触发该技能：
+Say something like this to the AI in OpenCode / Codex / Claude Code to trigger the skill:
 
-- 「帮我创建一个 Jenkins 插件」
-- 「我要开发一个 Jenkins 插件，Jenkins 版本 2.401.1」
-- 「生成一个 Jenkins Builder 插件骨架」
+- "Create a Jenkins plugin for me"
+- "I want to develop a Jenkins plugin, Jenkins version 2.401.1"
+- "Generate a Jenkins Builder plugin skeleton"
 
-AI 会主动询问你当前环境中缺失的关键信息，无需一次性准备好所有参数。
+The AI will ask for any missing information — no need to prepare everything upfront.
 
-## 需要准备什么
+## What You'll Need
 
-触发技能后，AI 会依次询问以下信息：
+The AI will guide you through these questions:
 
-| 信息 | 说明 | 示例 |
+| Information | Description | Example |
 |------|------|------|
-| Jenkins 版本 | 目标 Jenkins 最低版本 | `2.401.1` |
-| JDK 版本 | 项目使用的 Java 版本 | `11`、`17`、`21` |
-| Maven 版本 | (可选) 本地 Maven 版本 | `3.9` |
-| groupId | Maven 坐标 | `com.example.jenkins` |
-| artifactId | 项目标识 | `hello-plugin` |
-| 包名 | Java 包路径 | `com.example.jenkins.hello` |
-| 插件类型 | 选择一种扩展点 | 见下方说明 |
-| 是否需要异步/持久化/全局配置 | 额外功能开关 | 是 / 否 |
+| Jenkins version | Minimum target Jenkins version | `2.401.1` |
+| JDK version | Java version for the project | `11`, `17`, `21` |
+| Maven version | (Optional) Local Maven version | `3.9` |
+| groupId | Maven coordinate | `com.example.jenkins` |
+| artifactId | Project identifier | `hello-plugin` |
+| Package name | Java package path | `com.example.jenkins.hello` |
+| Plugin type | Choose an extension point | See below |
+| Output language | Language for generated code comments & README | `zh-CN`, `en`, `ja`, etc. |
+| Async / Persistence / Global config | Extra feature toggles | Yes / No |
 
-## 支持哪些插件类型
+## Supported Plugin Types
 
-- **Builder** — 自定义构建步骤（最常用）
-- **Publisher** — 构建后处理（通知、归档等）
-- **Trigger** — Cron 定时或 SCM 变更触发
-- **Action** — 添加界面操作按钮
-- **RunListener** — 监听构建生命周期事件
-- **ComputerListener** — 监听节点上下线
-- **QueueTaskDispatcher** — 任务分配调度
+- **Builder** — Custom build step (most common)
+- **Publisher** — Post-build processing (notifications, archiving, etc.)
+- **Trigger** — Cron schedules or SCM change triggers
+- **Action** — Add UI action buttons
+- **RunListener** — Listen for build lifecycle events
+- **ComputerListener** — Listen for node online/offline events
+- **QueueTaskDispatcher** — Task dispatch filtering
 
-## 使用示例
+## Usage Examples
 
-### 示例一：最简单的 Builder 插件
+### Example 1: Simple Builder Plugin
 
-**你说**：
+**You say**:
 
-> 帮我创建一个 Jenkins 插件，Jenkins 2.401，JDK 17，artifactId 是 my-build-step，做一个 Builder 类型的构建步骤插件
+> Create a Jenkins Builder plugin, Jenkins 2.401, JDK 17, artifactId: my-build-step
 
-**AI 会生成**：
+**AI generates**:
 
 ```
 my-build-step/
-├── pom.xml              # 含 Jenkins 官方仓库配置
-├── README.md            # 完整的使用说明
+├── pom.xml              # With Jenkins official repo config
+├── README.md            # Complete usage guide
 ├── .gitignore
 └── src/
     └── main/
         ├── java/.../
-        │   └── MyBuildStepBuilder.java   # Builder 扩展代码
+        │   └── MyBuildStepBuilder.java   # Builder extension code
         └── resources/.../
             └── MyBuildStepBuilder/
-                ├── config.jelly            # 配置界面
+                ├── config.jelly           # Config UI
                 └── help.html
 ```
 
-### 示例二：带持久化配置的 Listener
+### Example 2: Listener with Persistence
 
-**你说**：
+**You say**:
 
-> 开发一个 Jenkins RunListener 插件，Jenkins 2.426，JDK 21，artifactId 叫 build-auditor，需要持久化配置，包名 com.company.audit
+> Develop a Jenkins RunListener plugin, Jenkins 2.426, JDK 21, artifactId: build-auditor, with persistence config, package: com.company.audit, output in Chinese
 
-**AI 会生成**：
+**AI generates**:
 
 ```
 build-auditor/
@@ -90,49 +94,58 @@ build-auditor/
         ├── java/com/company/audit/
         │   ├── BuildAuditorListener.java    # RunListener
         │   └── config/
-        │       └── PluginConfiguration.java  # 持久化配置类
+        │       └── PluginConfiguration.java  # Persistence config class
         └── resources/
 ```
 
-## Jenkins 开发新手？
+### Example 3: Specify Output Language
 
-如果你不熟悉 Jenkins 插件开发，以下是需要了解的几个核心概念（10 秒速览）：
+**You say**:
 
-| 概念 | 一句话解释 | 你通常需要的 |
+> Generate a Jenkins plugin, Builder type. Jenkins 2.440, JDK 17, artifactId: my-step. Output README and code comments in Japanese.
+
+> (Or in Chinese: "生成的代码注释和 README 用中文")
+
+## New to Jenkins Plugin Development?
+
+Here's a 10-second overview of the key concepts:
+
+| Concept | One-liner | What you need |
 |------|-----------|-------------|
-| **扩展点 (Extension Point)** | Jenkins 预留的"钩子"，插件实现它来插入逻辑 | 选一个类型（Builder 最常用） |
-| **Descriptor** | 描述"这个插件叫什么、怎么显示"，每个扩展点类都带一个 | 技能自动生成，不用管 |
-| **config.jelly** | 用 XML 写的插件配置页面 | 技能根据你的字段类型自动选控件 |
-| **hpi** | Jenkins 插件打包格式，类似 WAR 之于 Web 应用 | `mvn clean package` 后自动生成 |
-| **DataBoundConstructor** | 标记"这些参数从配置页保存下来"的构造方法 | 技能自动加，不用手写 |
+| **Extension Point** | Jenkins' "hooks" — plugins implement them to inject logic | Pick one type (Builder is most common) |
+| **Descriptor** | Describes "what this plugin is called and how it displays" | Auto-generated, ignore |
+| **config.jelly** | Plugin config page written in XML | The skill auto-selects controls based on your field types |
+| **hpi** | Jenkins plugin package format (like WAR for web apps) | Auto-generated after `mvn clean package` |
+| **DataBoundConstructor** | Marks the constructor that receives config page parameters | Auto-added, no hand-writing needed |
 
-**第一次使用建议**：直接说「帮我创建一个 Jenkins Builder 插件，Jenkins 2.401.1，JDK 17」，技能会帮你完成剩下的。
+**First-time tip**: Just say "Create a Jenkins Builder plugin, Jenkins 2.401.1, JDK 17" — the skill handles the rest.
 
-## 生成后做什么
+## After Generation
 
-AI 会同时提供后续操作指引：
+The AI will also provide follow-up guidance:
 
-1. 进入项目目录执行 `mvn clean package` 构建
-2. `mvn hpi:run` 本地启动 Jenkins 测试
-3. 将生成的 `.hpi` 上传到 Jenkins 插件管理中心
-4. 重启 Jenkins 后验证功能
+1. Run `mvn clean package` to build
+2. Use `mvn hpi:run` for local Jenkins testing
+3. Upload the generated `.hpi` via Jenkins Plugin Manager
+4. Restart Jenkins and verify functionality
 
-## 已知限制
+## Known Limitations
 
-当前技能主要靠对话引导，在以下场景需要你多留意：
+Be mindful of these scenarios:
 
-| 场景 | 影响 | 建议 |
+| Scenario | Impact | Suggestion |
 |------|------|------|
-| 输错版本号（如 `Jenkins 3.0`） | 可能生成错误的 Parent POM 版本 | 参考 [Jenkins 与 JDK 兼容表](https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html) 核对 |
-| 版本组合不兼容（如 Jenkins 2.426 + JDK 11） | 构建或运行时报错 | 确保 JDK 版本 ≥ Jenkins 要求的最低版本 |
-| 漏填必填信息 | 生成的项目不完整 | 仔细过一遍「需要准备什么」清单 |
-| 自定义扩展点（非 7 种标准类型） | 不会自动生成该类型代码 | 选择最接近的类型后在生成结果上手动改造 |
-| 复杂插件（多扩展点、自定义 Descriptor） | 一次只能生成一个主扩展点骨架 | 分多次生成再手动合并 |
+| Wrong version format (e.g. `Jenkins 3.0`) | May generate incorrect Parent POM version | Double-check against the [Jenkins/Java compatibility table](https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html) |
+| Incompatible version combo (e.g. Jenkins 2.426 + JDK 11) | Build or runtime errors | Ensure JDK version ≥ Jenkins' minimum requirement |
+| Missing required info | Incomplete generated project | Walk through the "What You'll Need" checklist |
+| Custom extension point (not in the 7 standard types) | Code for that type won't be generated | Choose the closest type and manually adapt |
+| Complex plugins (multiple extension points) | Only one primary extension point skeleton per generation | Generate separately and merge |
 
-遇到问题可查看项目内的 `references/troubleshooting.md`，或直接在对话中描述你遇到的现象。
+Check `references/troubleshooting.md` or describe what you're seeing in the conversation.
 
-## 提醒
+## Notes
 
-- 技能不会假定默认版本——请明确告知 Jenkins 和 JDK 版本
-- 默认使用 Jenkins 官方 Maven 仓库，无需额外配置 `settings.xml`
-- 所有生成的代码都包含注释，可直接在此基础上进行二次开发
+- No default versions are assumed — always specify Jenkins and JDK versions
+- Uses Jenkins official Maven repository by default — no extra `settings.xml` needed
+- Generated code includes comments and is ready for further development
+- **Multi-language support**: generated comments and README can be in Chinese, English, Japanese, or any other language — just tell the AI your preference

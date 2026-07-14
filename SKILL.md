@@ -3,6 +3,7 @@ description: 根据用户提供的Jenkins版本和JDK版本生成Jenkins插件�
 name: jenkins-plugin-skeleton-generator-skill
 activation:
   - 用户请求创建/生成/搭建/开发 Jenkins 插件
+  - User requests to create/generate/build/develop a Jenkins plugin
 ---
 
 # Jenkins插件骨架生成器技能
@@ -12,6 +13,26 @@ activation:
 生成与用户环境匹配的Jenkins插件基础结构。
 
 **重要规则**：本技能**不得**假定默认的Jenkins版本或JDK版本。在用户确认版本之前，**请勿生成任何文件**。
+
+### 语言规则
+
+**交互语言**（对话、提问、校验提示）：自动检测用户消息语言并保持一致。
+
+**输出语言**（代码注释、README.md）：在收集信息时**主动询问**用户偏好。用户未指定则以交互语言为默认。
+
+| 选项 | 生成结果 |
+|------|---------|
+| 中文 | `README.md`（中文）+ 中文代码注释 |
+| English | `README.md`（英文）+ 英文代码注释 |
+| 中英双语 | `README.md`（交互语言）+ `README.en.md`（英文） + 代码注释用交互语言 |
+| 日本語等 | 对应语言的 README + 注释 |
+
+询问模板：
+```
+中文交互 → "生成的代码注释和 README 用什么语言？（默认中文，也可选 English、中英双语、日本語等）"
+English  → "What language for generated code comments and README? (Default: English, or zh-CN, bilingual, ja, etc.)"
+```
+
 
 ---
 
@@ -73,6 +94,7 @@ references/                        # 参考文档
 7. **是否需要异步执行**：□ 是 □ 否
 8. **是否需要持久化配置**：□ 是 □ 否
 9. **是否需要全局配置页面**：□ 是 □ 否
+10. **输出语言**（生成的代码注释和 README 的语言）：默认与交互语言一致，也可指定为 English、日本語等
 
 ---
 
@@ -89,15 +111,17 @@ references/                        # 参考文档
 
 **输入验证与纠错**（在生成文件前必须执行）：
 
-以下为校验规则，**每条包含检测到问题时必须直接输出给用户的提示语**，不得省略或改写。
+以下为校验规则，**每条包含中/英双语提示**，根据交互语言选对应版本输出。
 
 ---
 
 **① 必填项检查**
 
-Jenkins 版本和 JDK 版本缺一不可。缺少任一字段 → **追问**：
+Jenkins 版本和 JDK 版本缺一不可 → **追问**：
 
 > ⚠️ 还需要一个信息：请问你使用的 **Jenkins 版本**（如 2.401.1）和 **JDK 版本**（如 17）是什么？
+>
+> ⚠️ One more thing: what **Jenkins version** (e.g. `2.401.1`) and **JDK version** (e.g. `17`) are you using?
 
 ---
 
@@ -105,59 +129,57 @@ Jenkins 版本和 JDK 版本缺一不可。缺少任一字段 → **追问**：
 
 | 字段 | 合法格式 | 非法示例 |
 |------|---------|---------|
-| Jenkins 版本 | `x.y.z`（三段数字，如 `2.401.1`） | `2.401`、`latest`、`LTS` |
+| Jenkins 版本 | `x.y.z`（如 `2.401.1`） | `2.401`、`latest`、`LTS` |
 | JDK 版本 | 纯数字（`8`、`11`、`17`、`21`） | `jdk17`、`1.8`、`17.0` |
 
-检测到非法格式 → **直接指出并给出正确示例**：
+检测到非法格式 → **指出并给示例**：
 
-> ⚠️ `[用户输入的值]` 不是合法的 `[Jenkins/JDK]` 版本格式。
-> - Jenkins 版本请使用 `x.y.z` 格式，例如 `2.401.1`
-> - JDK 版本请使用数字，例如 `11`、`17`、`21`
+> ⚠️ `[值]` 不是合法的 `[Jenkins/JDK]` 版本格式。Jenkins 版本请用 `x.y.z`（如 `2.401.1`），JDK 请用数字（如 `17`）。请重新提供。
 >
-> 请重新提供正确的版本号。
+> ⚠️ `[value]` is not a valid `[Jenkins/JDK]` version. Use `x.y.z` (e.g. `2.401.1`) for Jenkins, a number (e.g. `17`) for JDK. Please re-enter.
 
 ---
 
 **③ Jenkins 与 JDK 兼容性校验**
 
-| Jenkins 版本 | 最低 JDK | 说明 |
-|-------------|---------|------|
-| < 2.361 | JDK 8 | 已结束生命周期，建议升级 |
-| 2.361 - 2.419 | JDK 11 | |
-| 2.420 - 2.462 | JDK 17 | |
-| 2.463+ | JDK 17 或 JDK 21 | |
+| Jenkins | 最低 JDK | 说明 |
+|---------|---------|------|
+| < 2.361 | JDK 8 | EOL |
+| 2.361-2.419 | JDK 11 | |
+| 2.420-2.462 | JDK 17 | |
+| 2.463+ | JDK 17/21 | |
 
-检测到不兼容 → **明确指出问题组合并给出两个修正选项**：
+不兼容 → **给出问题 + 两个选择**：
 
-> ⚠️ **版本不兼容**：Jenkins `[版本A]` 要求最低 JDK `[版本B]`，但你提供的是 JDK `[版本C]`。这会导致构建或运行时出错。
+> ⚠️ Jenkins `[A]` 要求 JDK `[B]`+，你提供的是 JDK `[C]`。请 ① 升级 JDK 到 `[B]` 或 ② 降低 Jenkins 版本。
 >
-> 请选择以下方案之一：
-> 1. **升级 JDK** 到 `[版本B]` 或更高
-> 2. **降低 Jenkins 版本**到与 JDK `[版本C]` 兼容的版本
+> ⚠️ Jenkins `[A]` requires JDK `[B]`+, but you specified JDK `[C]`. Options: ① upgrade JDK to `[B]`+ or ② downgrade Jenkins.
 
 ---
 
-**④ Plugin Parent POM 版本确定**
+**④ Parent POM 确定**
 
-| Jenkins 版本 | Parent POM |
-|-------------|-----------|
+| Jenkins | Parent POM |
+|---------|-----------|
 | 2.361.x | 4.66 |
 | 2.401.x | 4.75 |
 | 2.426.x | 4.80 |
 | 2.440.x | 4.83 |
 | 2.462.x | 4.85 |
 
-精确匹配成功 → 静默使用，不提示。
+不匹配时告知：
 
-无法精确匹配 → **告知用户匹配策略和最终选择**：
-
-> ℹ️ 未找到与 Jenkins `[版本]` 精确匹配的 Parent POM。已自动选择 `4.XX`（≤ 当前 Jenkins 版本的最新 Parent POM），如构建出现问题请检查版本兼容性。
+> ℹ️ 未精确匹配，已选 Parent POM `4.XX`（≤ Jenkins 版本的最新版）。
+>
+> ℹ️ No exact match, auto-selected Parent POM `4.XX` (latest ≤ Jenkins version).
 
 ---
 
-**汇总输出**（所有校验通过后，生成文件前简要确认）：
+**汇总**（校验通过后）：
 
-> ✓ 版本校验通过 | Jenkins `[版本]` + JDK `[版本]` + Parent POM `4.XX`，开始生成项目。
+> ✓ 校验通过 | Jenkins `[版本]` + JDK `[版本]` + Parent POM `4.XX` + 输出语言 `[语言]`
+>
+> ✓ Passed | Jenkins `[ver]` + JDK `[ver]` + Parent POM `4.XX` + Output `[lang]`
 
 > 详细兼容性检查项目见 `references/compatibility-check.md`
 > 构建或运行中遇到问题见 `references/troubleshooting.md`
@@ -176,7 +198,7 @@ Jenkins 版本和 JDK 版本缺一不可。缺少任一字段 → **追问**：
 
 ### 第四步：README 生成
 
-根据用户提供的插件元数据，生成 `README.md` 文件。模板 `templates/readme-template.md` 使用 `{{PLACEHOLDER}}` 占位符，生成时替换为实际值：
+根据用户选择的输出语言，用 `templates/readme-template.md` 生成对应语言的 `README.md`。章节标题和说明文字必须用输出语言。
 
 | 占位符 | 来源 | 填充示例 |
 |--------|------|---------|
@@ -213,13 +235,13 @@ Jenkins 版本和 JDK 版本缺一不可。缺少任一字段 → **追问**：
 
 ### 第六步：插件代码生成
 
-根据用户选择的插件类型，使用对应模板生成扩展代码：
+根据插件类型生成代码。**代码注释必须用输出语言**（如用户选 English 则 `// Build logic`，选中文则 `// 构建逻辑`）。
 
-| 插件类型 | 对应模板文件 |
-|---------|------------|
+| 插件类型 | 模板 |
+|---------|------|
 | Builder | `templates/builder.md` |
 | RunListener | `templates/run-listener.md` |
-| AsyncPeriodicWork（异步） | `templates/async-periodic-work.md` |
+| AsyncPeriodicWork | `templates/async-periodic-work.md` |
 | 持久化配置 | `templates/plugin-configuration.md` |
 
 ### 第七步：资源文件生成
